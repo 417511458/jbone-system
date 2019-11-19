@@ -65,7 +65,6 @@ public class UserService {
      * 2、用户权限
      * 3、用户角色
      * 4、用户菜单
-     * 注：如果没有传服务名，则不加载用户菜单
      * @return 用户详细信息
      */
     public UserResponseDO commonRequest(UserRequestDO userRequestDO) {
@@ -175,62 +174,62 @@ public class UserService {
 
             userAuthInfoDO.setPermissions(permissions);
 
-            //如果不包含服务名，则不加载菜单信息
+            Map<String,List<MenuInfoResponseDTO>> menus = new HashMap<>();
+            //如果指定服务名，则加载服务菜单信息，如果未指定，加载全部
             if(!StringUtils.isBlank(userRequestDO.getServerName())){
-                //解析前用户拥有的菜单
-                List<MenuInfoResponseDTO> menuList = new ArrayList<>();
-                List<RbacMenuEntity> correctMenuList = new ArrayList<>();
-
+                //获取用户拥有的菜单
                 RbacSystemEntity systemEntity = systemRepository.findByName(userRequestDO.getServerName());
                 if(systemEntity != null){
-                    List<RbacUserEntity> userCondition = new ArrayList<>();
-                    userCondition.add(userEntity);
-
-                    //获取用户和对应角色拥有的系统菜单
-                    List<RbacMenuEntity> roleMenus = menuRepository.findDistinctByRolesInAndPidAndSystemIdOrderByOrdersDesc(userEntity.getRoles(),0,systemEntity.getId());
-                    List<RbacMenuEntity> userMenus = menuRepository.findDistinctByUsersInAndPidAndSystemIdOrderByOrdersDesc(userCondition,0,systemEntity.getId());
-                    correctMenuList.addAll(roleMenus);
-                    correctMenuList.addAll(userMenus);
-
-                    for (RbacMenuEntity menuEntity : correctMenuList){
-                        MenuInfoResponseDTO menu = new MenuInfoResponseDTO();
-                        BeanUtils.copyProperties(menuEntity,menu);
-                        if(isContains(menuList,menu)){
-                            continue;
-                        }
-                        List<RbacMenuEntity> childRoleMenus = menuRepository.findDistinctByRolesInAndPidAndSystemIdOrderByOrdersDesc(userEntity.getRoles(),menuEntity.getId(),systemEntity.getId());
-                        List<RbacMenuEntity> childUserMenus = menuRepository.findDistinctByUsersInAndPidAndSystemIdOrderByOrdersDesc(userCondition,menuEntity.getId(),systemEntity.getId());
-                        List<RbacMenuEntity> childMenus = new ArrayList<>();
-                        childMenus.addAll(childRoleMenus);
-                        childMenus.addAll(childUserMenus);
-
-                        if(!childMenus.isEmpty()){
-                            List<MenuInfoResponseDTO> childMenuList = new ArrayList<>();
-                            for (RbacMenuEntity childMenuEntity : childMenus){
-                                MenuInfoResponseDTO childMenu = new MenuInfoResponseDTO();
-                                BeanUtils.copyProperties(childMenuEntity,childMenu);
-                                if(isContains(childMenuList,childMenu)){
-                                    continue;
-                                }
-                                childMenuList.add(childMenu);
-
-                            }
-                            Collections.sort(childMenuList);
-                            menu.setChildMenus(childMenuList);
-                        }
-
-                        menuList.add(menu);
-
-                    }
-                    Collections.sort(menuList);
-                    userAuthInfoDO.setMenus(menuList);
+                    menus.put(systemEntity.getName(),getUserMenuInfos(userEntity,systemEntity,0));
+                    userAuthInfoDO.setMenus(menus);
                 }
+            }else{
+                List<RbacSystemEntity> systemEntities = systemRepository.findAll();
+                if(!CollectionUtils.isEmpty(systemEntities)){
+                    for (RbacSystemEntity systemEntity: systemEntities){
+                        menus.put(systemEntity.getName(),getUserMenuInfos(userEntity,systemEntity,0));
+                        userAuthInfoDO.setMenus(menus);
+                    }
+                }
+
             }
         }
 
 
 
         return userResponseDO;
+    }
+
+
+
+    private List<MenuInfoResponseDTO> getUserMenuInfos(RbacUserEntity userEntity,RbacSystemEntity systemEntity,int pid){
+        if(userEntity == null || systemEntity == null){
+            return null;
+        }
+        List<MenuInfoResponseDTO> menuList = new ArrayList<>();
+        List<RbacMenuEntity> correctMenuList = new ArrayList<>();
+        List<RbacUserEntity> userCondition = new ArrayList<>();
+        userCondition.add(userEntity);
+
+        //获取用户和对应角色拥有的系统菜单
+        List<RbacMenuEntity> roleMenus = menuRepository.findDistinctByRolesInAndPidAndSystemIdOrderByOrdersDesc(userEntity.getRoles(),pid,systemEntity.getId());
+        List<RbacMenuEntity> userMenus = menuRepository.findDistinctByUsersInAndPidAndSystemIdOrderByOrdersDesc(userCondition,pid,systemEntity.getId());
+        correctMenuList.addAll(roleMenus);
+        correctMenuList.addAll(userMenus);
+
+        for (RbacMenuEntity menuEntity : correctMenuList){
+            MenuInfoResponseDTO menu = new MenuInfoResponseDTO();
+            BeanUtils.copyProperties(menuEntity,menu);
+            if(isContains(menuList,menu)){
+                continue;
+            }
+            List<MenuInfoResponseDTO> childMenus = getUserMenuInfos(userEntity,systemEntity,menuEntity.getId());
+            menu.setChildMenus(childMenus);
+            menuList.add(menu);
+
+        }
+        Collections.sort(menuList);
+        return menuList;
     }
 
     /**

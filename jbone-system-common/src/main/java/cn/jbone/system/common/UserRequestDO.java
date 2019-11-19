@@ -69,7 +69,7 @@ public class UserRequestDO extends SearchListDO {
     public static UserRequestDO buildAll(Integer userId, String serverName){
         UserRequestDO userRequestDO = new UserRequestDO();
         userRequestDO.setUserId(userId);
-        userRequestDO.setModules(Arrays.asList(UserRequestModule.BASE, UserRequestModule.AUTH, UserRequestModule.SECURITY));
+        userRequestDO.setModules(Arrays.asList(UserRequestModule.BASE, UserRequestModule.AUTH, UserRequestModule.SECURITY,UserRequestModule.MENU));
         userRequestDO.setServerName(serverName);
         return userRequestDO;
     }
@@ -77,13 +77,13 @@ public class UserRequestDO extends SearchListDO {
     public static UserRequestDO buildAll(String username, String serverName){
         UserRequestDO userRequestDO = new UserRequestDO();
         userRequestDO.setUsername(username);
-        userRequestDO.setModules(Arrays.asList(UserRequestModule.BASE, UserRequestModule.AUTH, UserRequestModule.SECURITY));
+        userRequestDO.setModules(Arrays.asList(UserRequestModule.BASE, UserRequestModule.AUTH, UserRequestModule.SECURITY,UserRequestModule.MENU));
         userRequestDO.setServerName(serverName);
         return userRequestDO;
     }
 
     public enum UserRequestModule{
-        BASE,SECURITY,AUTH
+        BASE,SECURITY,AUTH,MENU
     }
 
     public boolean containsModule(UserRequestModule userRequestModule){
