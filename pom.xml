@@ -12,7 +12,6 @@
       <module>jbone-system-api</module>
       <module>jbone-system-common</module>
       <module>jbone-system-core</module>
-      <module>jbone-system-admin</module>
       <module>jbone-system-api-starter</module>
       <module>jbone-system-server</module>
     </modules>
@@ -187,11 +186,6 @@
         <version>${jbone.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>cn.jbone</groupId>
-        <artifactId>jbone-sso-client</artifactId>
-        <version>${jbone.sso.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>com.alibaba</groupId>
