@@ -21,7 +21,7 @@
     </modules>
 
   <name>jbone-system</name>
-  <url>http://www.jbone.cn</url>
+  <url>http://jbone.cn</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -225,9 +225,9 @@
     </license>
   </licenses>
   <scm>
-    <url>https://github.com/417511458/jbone-system</url>
-    <connection>scm:git:https://github.com/417511458/jbone-system.git</connection>
-    <developerConnection>scm:git:https://github.com/417511458/jbone-system</developerConnection>
+    <url>https://github.com/417511458/jbone</url>
+    <connection>scm:git:https://github.com/417511458/jbone.git</connection>
+    <developerConnection>scm:git:https://github.com/417511458/jbone</developerConnection>
   </scm>
   <developers>
     <developer>
